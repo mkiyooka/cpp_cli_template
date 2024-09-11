@@ -1,0 +1,10 @@
+If:
+    PathMatch: .*
+
+CompileFlags:
+    Add:
+        - -Wall
+        - -xc++
+        - -std=c++11
+        - --target=x86_64-linux-gnu
+    Compiler: g++

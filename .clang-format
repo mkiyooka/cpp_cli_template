@@ -1,0 +1,10 @@
+BasedOnStyle: LLVM
+IndentWidth: 4
+ColumnLimit: 120
+Language: Cpp
+Standard: Auto
+UseCRLF: false
+UseTab: Never
+SortIncludes: Never
+AlignAfterOpenBracket: AlwaysBreak
+AlignArrayOfStructures: Right

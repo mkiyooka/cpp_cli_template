@@ -1,0 +1,10 @@
+-Wall
+-Wextra
+-Wno-unknown-pragmas
+-Wno-unused
+-Wno-unused-parameter
+-Wno-sign-compare
+-std=c++11
+-I./include
+-I./mod/spdlog/include
+-I./mod/CLI11//include

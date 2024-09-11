@@ -1,0 +1,6 @@
+[submodule "mod/CLI11"]
+	path = mod/CLI11
+	url = https://github.com/CLIUtils/CLI11
+[submodule "mod/spdlog"]
+	path = mod/spdlog
+	url = https://github.com/gabime/spdlog
