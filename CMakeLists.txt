@@ -10,6 +10,9 @@ endif()
 if(NOT DEFINED DOCTEST)
     set (DOCTEST "mod/doctest/doctest" CACHE STRING "doctest git repository")
 endif()
+if(NOT DEFINED NANOBENCH)
+    set (NANOBENCH "mod/nanobench/src" CACHE STRING "nanobench git repository")
+endif()
 
 add_library(modA STATIC
     src/modA/modA1.cpp include/modA/modA1.hpp
@@ -31,7 +34,6 @@ target_compile_features(cli PUBLIC cxx_std_11)
 add_subdirectory(${CLI11_DIR})
 include_directories(${CLI11_DIR}/include)
 
-add_compile_definitions(SPDLOG_ACTIVE_LEVEL=SPDLOG_LEVEL_TRACE)
 add_executable(cmd src/main.cpp)
 add_subdirectory(${SPDLOG_DIR})
 include_directories(${SPDLOG_DIR}/include)
@@ -74,3 +76,15 @@ add_test(
 add_test(
     NAME test_mul_div
     COMMAND $<TARGET_FILE:unit_test_mul_div>)
+
+add_executable(
+    bench_modA
+    bench/bench_modA.cpp
+    src/modA/modA1.cpp include/modA/modA1.hpp
+    src/modA/modA2.cpp include/modA/modA2.hpp
+    )
+target_link_libraries(bench_modA PUBLIC modA)
+target_link_libraries(bench_modA PUBLIC modB)
+#add_subdirectory(${NANOBENCH})
+include_directories(${NANOBENCH}/include)
+#target_link_libraries(bench_modA PUBLIC nanobench)
