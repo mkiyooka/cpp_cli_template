@@ -1,13 +1,47 @@
 #include <iostream>
 
 #include <spdlog/spdlog.h>
-//#include "spdlog/sinks/stdout_color_sinks.h"
+// #include "spdlog/sinks/stdout_color_sinks.h"
 
 #include "cli.hpp"
 #include "modA/modA1.hpp"
 #include "modA/modA2.hpp"
 #include "modB/modB1.hpp"
 #include "modB/modB2.hpp"
+
+class IGenerator {
+
+  public:
+    int x;
+    virtual ~IGenerator() = default;
+    virtual void generate() const = 0;
+};
+
+// GeneratorA クラス
+class GeneratorA : public IGenerator {
+  public:
+    void setParam(int x) { this->x = x; }
+    void generate() const override { std::cout << "GeneratorA: " << this->x << std::endl; }
+};
+
+// GeneratorB クラス
+class GeneratorB : public IGenerator {
+  public:
+    int y;
+    void setParam(int x, int y) {
+        this->x = x;
+        this->y = y;
+    }
+    void generate() const override {
+        std::cout << "GeneratorB: " << this->x * 2 << std::endl;
+        std::cout << "GeneratorB: " << this->y * 2 << std::endl;
+    }
+};
+
+void callGenerator(IGenerator &generator) {
+    generator.generate();
+    return;
+}
 
 int main(int argc, char *argv[]) {
     // Parse arguments for CLI
@@ -40,6 +74,18 @@ int main(int argc, char *argv[]) {
     spdlog::info("sub(2, 3)    = {}", sub(2, 3));
     spdlog::info("mul(2, 3)    = {}", mul(2, 3));
     spdlog::info("divide(2, 3) = {}", divide(2, 3));
+
+    GeneratorA generatorA;
+    GeneratorB generatorB;
+
+    generatorA.setParam(10);
+    generatorB.setParam(20, 30);
+    generatorA.generate();
+    generatorB.generate();
+
+    std::cout << "------------------" << std::endl;
+    callGenerator(generatorA);
+    callGenerator(generatorB);
 
     return 0;
 }
