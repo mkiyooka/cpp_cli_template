@@ -4,3 +4,9 @@
 [submodule "mod/spdlog"]
 	path = mod/spdlog
 	url = https://github.com/gabime/spdlog
+[submodule "mod/doctest"]
+	path = mod/doctest
+	url = https://github.com/doctest/doctest
+[submodule "mod/nanobench"]
+	path = mod/nanobench
+	url = https://github.com/martinus/nanobench
