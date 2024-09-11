@@ -1,13 +1,13 @@
 #include <iostream>
 
 #include <spdlog/spdlog.h>
-#include <spdlog/sinks/stdout_color_sinks.h>
+//#include "spdlog/sinks/stdout_color_sinks.h"
 
-#include <cli.hpp>
-#include <modA/modA1.hpp>
-#include <modA/modA2.hpp>
-#include <modB/modB1.hpp>
-#include <modB/modB2.hpp>
+#include "cli.hpp"
+#include "modA/modA1.hpp"
+#include "modA/modA2.hpp"
+#include "modB/modB1.hpp"
+#include "modB/modB2.hpp"
 
 int main(int argc, char *argv[]) {
     // Parse arguments for CLI

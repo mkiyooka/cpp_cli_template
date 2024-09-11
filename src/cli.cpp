@@ -2,7 +2,7 @@
 #include <spdlog/spdlog.h>
 #include <spdlog/sinks/stdout_color_sinks.h>
 
-#include <cli_subcomA.hpp>
+#include "cli_subcomA.hpp"
 
 int cli(int argc, char *argv[]) {
     CLI::App app{"cmd description"};
