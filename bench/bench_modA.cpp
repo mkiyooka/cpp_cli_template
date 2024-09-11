@@ -14,12 +14,17 @@ int main() {
         ankerl::nanobench::doNotOptimizeAway(d);
     });
     int r;
-    ankerl::nanobench::Bench().run("add, sub function", [&] {
+    ankerl::nanobench::Bench().run("add, sub x 1000 times function", [&] {
         for (auto i = 0; i < 1000; i++) {
             r = add(2, 3);
-            r = add(3, 4);
             r = sub(2, 3);
         }
         ankerl::nanobench::doNotOptimizeAway(r);
+    });
+    ankerl::nanobench::Bench().minEpochIterations(1000).run("sub func x 1000", [&] {
+        for (auto i = 0; i < 1000; ++i) {
+            r = sub(2, 3);
+            ankerl::nanobench::doNotOptimizeAway(r);
+        }
     });
 }
