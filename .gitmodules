@@ -10,3 +10,6 @@
 [submodule "mod/nanobench"]
 	path = mod/nanobench
 	url = https://github.com/martinus/nanobench
+[submodule "mod/quill"]
+	path = mod/quill
+	url = https://github.com/odygrd/quill

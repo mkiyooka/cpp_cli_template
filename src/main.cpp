@@ -1,91 +1,86 @@
 #include <iostream>
+#include <memory>
 
-#include <spdlog/spdlog.h>
-// #include "spdlog/sinks/stdout_color_sinks.h"
+#include "quill/Backend.h"
+#include "quill/Frontend.h"
+#include "quill/LogMacros.h"
+#include "quill/Logger.h"
+#include "quill/sinks/ConsoleSink.h"
+#include "quill/std/Array.h"
 
 #include "cli.hpp"
-#include "modA/modA1.hpp"
-#include "modA/modA2.hpp"
-#include "modB/modB1.hpp"
-#include "modB/modB2.hpp"
+#include "GeneratorA.hpp"
+#include "GeneratorB.hpp"
+#include "Solver.hpp"
 
-class IGenerator {
-
-  public:
-    int x;
-    virtual ~IGenerator() = default;
-    virtual void generate() const = 0;
-};
-
-// GeneratorA クラス
-class GeneratorA : public IGenerator {
-  public:
-    void setParam(int x) { this->x = x; }
-    void generate() const override { std::cout << "GeneratorA: " << this->x << std::endl; }
-};
-
-// GeneratorB クラス
-class GeneratorB : public IGenerator {
-  public:
-    int y;
-    void setParam(int x, int y) {
-        this->x = x;
-        this->y = y;
-    }
-    void generate() const override {
-        std::cout << "GeneratorB: " << this->x * 2 << std::endl;
-        std::cout << "GeneratorB: " << this->y * 2 << std::endl;
-    }
-};
-
-void callGenerator(IGenerator &generator) {
-    generator.generate();
-    return;
-}
+// #include "setup_logger.hpp"
 
 int main(int argc, char *argv[]) {
     // Parse arguments for CLI
     cli(argc, argv);
 
-    // spdlog::set_pattern("[%Y-%m-%d %H:%M:%S.%e][%^%L%$][%n] %v");
-    spdlog::set_pattern("[%^%L%$] %v");
-    try {
-        auto console_logger = spdlog::get("console");
-        console_logger->trace("trace log");
-        console_logger->debug("debug log");
-        console_logger->info("info log");
-        console_logger->warn("warn log");
-        console_logger->error("erro log");
-        console_logger->critical("critical log");
-    } catch (const spdlog::spdlog_ex &ex) {
-        std::cerr << "Log init failed: " << ex.what() << std::endl;
+    // setup_logger("error");
+
+    std::unique_ptr<IGenerator> generator;
+    std::string generator_type = "B";
+    if (generator_type == "A") {
+        auto generatorA = std::unique_ptr<GeneratorA>(new GeneratorA);
+        generatorA->setParam(2, -3);
+        generator = std::move(generatorA);
+    } else {
+        auto generatorB = std::unique_ptr<GeneratorB>(new GeneratorB);
+        generatorB->setParam(2, 3, -4);
+        generator = std::move(generatorB);
     }
 
-    spdlog::trace("trace log");
-    spdlog::debug("debug log");
-    spdlog::info("info log");
-    spdlog::warn("warn log");
-    spdlog::error("erro log");
-    spdlog::critical("critical log");
+    Solver solver(*generator);
+    solver.solve();
 
-    spdlog::info("fmt int:{} double:{} char:{} chars:{}", 10, 3.14, 'c', "text");
+    // Backend
+    quill::BackendOptions backend_options;
+    quill::Backend::start(backend_options);
 
-    spdlog::info("add(2, 3)    = {}", add(2, 3));
-    spdlog::info("sub(2, 3)    = {}", sub(2, 3));
-    spdlog::info("mul(2, 3)    = {}", mul(2, 3));
-    spdlog::info("divide(2, 3) = {}", divide(2, 3));
+    // Frontend
+    auto console_sink = quill::Frontend::create_or_get_sink<quill::ConsoleSink>("sink_id_1");
+    quill::Logger *logger = quill::Frontend::create_or_get_logger("root", std::move(console_sink));
 
-    GeneratorA generatorA;
-    GeneratorB generatorB;
+    // Change the LogLevel to print everything
+    logger->set_log_level(quill::LogLevel::TraceL3);
 
-    generatorA.setParam(10);
-    generatorB.setParam(20, 30);
-    generatorA.generate();
-    generatorB.generate();
+    // A log message with number 123
+    int a = 123;
+    std::string l = "log";
+    LOG_INFO(logger, "A {} message with number {}", l, a);
 
-    std::cout << "------------------" << std::endl;
-    callGenerator(generatorA);
-    callGenerator(generatorB);
+    // libfmt formatting language is supported 3.14e+00
+    double pi = 3.141592653589793;
+    LOG_INFO(logger, "libfmt formatting language is supported {:.2e}", pi);
+
+    // Logging STD types is supported [1, 2, 3]
+    std::array<int, 3> arr = {1, 2, 3};
+    LOG_INFO(logger, "Logging STD types is supported {}", arr);
+
+    // Logging STD types is supported [arr: [1, 2, 3]]
+    LOGV_INFO(logger, "Logging STD types is supported", arr);
+
+    // A message with two variables [a: 123, b: 3.17]
+    double b = 3.17;
+    LOGV_INFO(logger, "A message with two variables", a, b);
+
+    for (uint32_t i = 0; i < 10; ++i) {
+        // Will only log the message once per second
+        LOG_INFO_LIMIT(std::chrono::seconds{1}, logger, "A {} message with number {}", l, a);
+        LOGV_INFO_LIMIT(std::chrono::seconds{1}, logger, "A message with two variables", a, b);
+    }
+
+    LOG_TRACE_L3(logger, "Support for floats {:03.2f}", 1.23456);
+    LOG_TRACE_L2(logger, "Positional arguments are {1} {0} ", "too", "supported");
+    LOG_TRACE_L1(logger, "{:>30}", std::string_view{"right aligned"});
+    LOG_DEBUG(logger, "Debugging foo {}", 1234);
+    LOG_INFO(logger, "Welcome to Quill!");
+    LOG_WARNING(logger, "A warning message.");
+    LOG_ERROR(logger, "An error message. error code {}", 123);
+    LOG_CRITICAL(logger, "A critical error.");
 
     return 0;
 }
