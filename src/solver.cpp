@@ -1,7 +1,7 @@
 #include <iostream>
 
-#include "IGenerator.hpp"
-#include "Solver.hpp"
+#include "igenerator.hpp"
+#include "solver.hpp"
 
 void Solver::solve() {
     double xl = 0.0;

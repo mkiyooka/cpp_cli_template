@@ -1,8 +1,8 @@
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include <doctest.h>
 
-#include "GeneratorA.hpp"
-#include "GeneratorB.hpp"
+#include "generator_a.hpp"
+#include "generator_b.hpp"
 
 int factorial(int number) { return number <= 1 ? number : factorial(number - 1) * number; }
 

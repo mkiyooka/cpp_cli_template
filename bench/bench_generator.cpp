@@ -1,8 +1,8 @@
 #define ANKERL_NANOBENCH_IMPLEMENT
 #include <nanobench.h>
 
-#include "GeneratorA.hpp"
-#include "GeneratorB.hpp"
+#include "generator_a.hpp"
+#include "generator_b.hpp"
 
 int main() {
     GeneratorA generatorA;
@@ -16,7 +16,7 @@ int main() {
         }
         ankerl::nanobench::doNotOptimizeAway(r);
     });
-    ankerl::nanobench::Bench().minEpochIterations(1000).run("generateA.generate 1000 times function", [&] {
+    ankerl::nanobench::Bench().minEpochIterations(100).run("generateA.generate 1000 times function", [&] {
         for (auto i = 0; i < 1000; ++i) {
             r = generatorA.generate(2.0);
             ankerl::nanobench::doNotOptimizeAway(r);
@@ -28,7 +28,7 @@ int main() {
         }
         ankerl::nanobench::doNotOptimizeAway(r);
     });
-    ankerl::nanobench::Bench().minEpochIterations(1000).run("generateB.generate 1000 times function", [&] {
+    ankerl::nanobench::Bench().minEpochIterations(10).run("generateB.generate 1000 times function", [&] {
         for (auto i = 0; i < 1000; ++i) {
             r = generatorB.generate(2.0);
             ankerl::nanobench::doNotOptimizeAway(r);

@@ -1,25 +1,101 @@
-#include <iostream>
-#include <memory>
+#include <string> // NOLINT
+#include <memory> // NOLINT
 
-#include "quill/Backend.h"
-#include "quill/Frontend.h"
-#include "quill/LogMacros.h"
-#include "quill/Logger.h"
-#include "quill/sinks/ConsoleSink.h"
-#include "quill/std/Array.h"
+// #include <fmt/core.h>
+#include <spdlog/spdlog.h> // NOLINT
+#include <spdlog/sinks/stdout_sinks.h> // NOLINT
+#include <spdlog/sinks/stdout_color_sinks.h> // NOLINT
+#include <spdlog/fmt/bundled/core.h> // NOLINT
 
 #include "cli.hpp"
-#include "GeneratorA.hpp"
-#include "GeneratorB.hpp"
-#include "Solver.hpp"
+#include "generator_a.hpp"
+#include "generator_b.hpp"
+#include "solver.hpp"
 
 // #include "setup_logger.hpp"
+
+class SpdLogger {
+private:
+    std::shared_ptr<spdlog::logger> _logger;
+
+public:
+    explicit SpdLogger(const std::string &name) {
+        auto sink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
+        _logger = std::make_shared<spdlog::logger>(name, sink);
+    }
+    SpdLogger(const std::string &name, const std::string &pattern) {
+        auto sink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
+        _logger = std::make_shared<spdlog::logger>(name, sink);
+        _logger->set_pattern(pattern);
+    }
+    ~SpdLogger() = default;
+    SpdLogger(const SpdLogger &) = delete;
+    SpdLogger &operator=(SpdLogger const &) = delete;
+    SpdLogger(SpdLogger &&) = delete;
+    SpdLogger &operator=(SpdLogger &&) = delete;
+    void setPattern() { _logger->set_pattern("[%Y-%m-%d %T.%e][%^%L%$][%n] %v"); }
+    void setPattern(const std::string &pattern) { _logger->set_pattern(pattern); }
+
+    void setLevelTrace() { _logger->set_level(spdlog::level::trace); }
+    void setLevelDebug() { _logger->set_level(spdlog::level::debug); }
+    void setLevelInfo() { _logger->set_level(spdlog::level::info); }
+    void setLevelWarn() { _logger->set_level(spdlog::level::warn); }
+    void setLevelError() { _logger->set_level(spdlog::level::err); }
+    void setLevelCritical() { _logger->set_level(spdlog::level::critical); }
+    void setLevel(const std::string &logLevel) {
+        if (logLevel == "trace") {
+            _logger->set_level(spdlog::level::trace);
+        } else if (logLevel == "debug") {
+            _logger->set_level(spdlog::level::debug);
+        } else if (logLevel == "info") {
+            _logger->set_level(spdlog::level::info);
+        } else if (logLevel == "warning") {
+            _logger->set_level(spdlog::level::warn);
+        } else if (logLevel == "error") {
+            _logger->set_level(spdlog::level::err);
+        } else if (logLevel == "critical") {
+            _logger->set_level(spdlog::level::critical);
+        }
+    }
+    void trace(const std::string &s) const { _logger->trace(s); }
+    void debug(const std::string &s) const { _logger->debug(s); }
+    void info(const std::string &s) const { _logger->info(s); }
+    void warn(const std::string &s) const { _logger->warn(s); }
+    void error(const std::string &s) const { _logger->error(s); }
+    void critical(const std::string &s) const { _logger->critical(s); }
+    std::shared_ptr<spdlog::logger> get() const { return _logger; }
+};
 
 int main(int argc, char *argv[]) {
     // Parse arguments for CLI
     cli(argc, argv);
+    // fmt::print("Hello, world!\n");
+    // std::string s = fmt::format("Hello, {}!\n", "world");
+    // fmt::print(s);
 
-    // setup_logger("error");
+    SpdLogger logger("color", "%^[%L][%Y-%m-%d %T.%F][%P/%t][%n] %v%$"); // %e:ms, %f:us, %F:ns
+    logger.setLevelDebug();
+
+    logger.trace("Trace");
+    logger.debug("Debug");
+    logger.info("Info");
+    logger.warn("Warning");
+    logger.error("Error");
+    logger.critical("Critical");
+
+    SPDLOG_TRACE("SPDLOG_TRACE");
+    SPDLOG_DEBUG("SPDLOG_DEBUG");
+    SPDLOG_INFO("SPDLOG_INFO");
+    SPDLOG_WARN("SPDLOG_WARN");
+    SPDLOG_ERROR("SPDLOG_ERROR");
+    SPDLOG_CRITICAL("SPDLOG_CRITICAL");
+
+    SPDLOG_LOGGER_TRACE(logger.get(), "SPDLOG_TRACE");
+    SPDLOG_LOGGER_DEBUG(logger.get(), "SPDLOG_DEBUG");
+    SPDLOG_LOGGER_INFO(logger.get(), "SPDLOG_INFO");
+    SPDLOG_LOGGER_WARN(logger.get(), "SPDLOG_WARN");
+    SPDLOG_LOGGER_ERROR(logger.get(), "SPDLOG_ERROR");
+    SPDLOG_LOGGER_CRITICAL(logger.get(), "SPDLOG_CRITICAL");
 
     std::unique_ptr<IGenerator> generator;
     std::string generator_type = "B";
@@ -35,52 +111,6 @@ int main(int argc, char *argv[]) {
 
     Solver solver(*generator);
     solver.solve();
-
-    // Backend
-    quill::BackendOptions backend_options;
-    quill::Backend::start(backend_options);
-
-    // Frontend
-    auto console_sink = quill::Frontend::create_or_get_sink<quill::ConsoleSink>("sink_id_1");
-    quill::Logger *logger = quill::Frontend::create_or_get_logger("root", std::move(console_sink));
-
-    // Change the LogLevel to print everything
-    logger->set_log_level(quill::LogLevel::TraceL3);
-
-    // A log message with number 123
-    int a = 123;
-    std::string l = "log";
-    LOG_INFO(logger, "A {} message with number {}", l, a);
-
-    // libfmt formatting language is supported 3.14e+00
-    double pi = 3.141592653589793;
-    LOG_INFO(logger, "libfmt formatting language is supported {:.2e}", pi);
-
-    // Logging STD types is supported [1, 2, 3]
-    std::array<int, 3> arr = {1, 2, 3};
-    LOG_INFO(logger, "Logging STD types is supported {}", arr);
-
-    // Logging STD types is supported [arr: [1, 2, 3]]
-    LOGV_INFO(logger, "Logging STD types is supported", arr);
-
-    // A message with two variables [a: 123, b: 3.17]
-    double b = 3.17;
-    LOGV_INFO(logger, "A message with two variables", a, b);
-
-    for (uint32_t i = 0; i < 10; ++i) {
-        // Will only log the message once per second
-        LOG_INFO_LIMIT(std::chrono::seconds{1}, logger, "A {} message with number {}", l, a);
-        LOGV_INFO_LIMIT(std::chrono::seconds{1}, logger, "A message with two variables", a, b);
-    }
-
-    LOG_TRACE_L3(logger, "Support for floats {:03.2f}", 1.23456);
-    LOG_TRACE_L2(logger, "Positional arguments are {1} {0} ", "too", "supported");
-    LOG_TRACE_L1(logger, "{:>30}", std::string_view{"right aligned"});
-    LOG_DEBUG(logger, "Debugging foo {}", 1234);
-    LOG_INFO(logger, "Welcome to Quill!");
-    LOG_WARNING(logger, "A warning message.");
-    LOG_ERROR(logger, "An error message. error code {}", 123);
-    LOG_CRITICAL(logger, "A critical error.");
 
     return 0;
 }

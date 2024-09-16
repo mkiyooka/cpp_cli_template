@@ -1,6 +1,6 @@
 #include <iostream>
 
-#include "IGenerator.hpp"
+#include "igenerator.hpp"
 
 // GeneratorA クラス
 class GeneratorA : public IGenerator {

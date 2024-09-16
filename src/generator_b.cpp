@@ -1,4 +1,4 @@
-#include "GeneratorB.hpp"
+#include "generator_b.hpp"
 
 // GeneratorB クラス
 void GeneratorB::setParam(double a, double b, double c) {

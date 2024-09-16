@@ -8,6 +8,6 @@
 -I./include
 -I./mod/spdlog/include
 -I./mod/CLI11//include
--I./mod/quill/include
+-I./mod/fmt/include
 -I./mod/doctest/doctest
 -I./mod/nanobench/src/include

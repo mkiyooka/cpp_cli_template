@@ -1,6 +1,6 @@
 #include <CLI/CLI.hpp>
 
-#include "cli_subcomA.hpp"
+#include "cli_subcom_a.hpp"
 
 int cli(int argc, char *argv[]) {
     CLI::App app{"cmd description"};

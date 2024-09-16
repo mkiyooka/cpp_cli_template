@@ -1,6 +1,6 @@
 #pragma once
 
-#include "IGenerator.hpp"
+#include "igenerator.hpp"
 
 class Solver {
 private:

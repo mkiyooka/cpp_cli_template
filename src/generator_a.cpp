@@ -1,4 +1,4 @@
-#include "GeneratorA.hpp"
+#include "generator_a.hpp"
 
 void GeneratorA::setParam(double a, double b) {
     _a = a;
