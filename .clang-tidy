@@ -21,16 +21,25 @@ Checks: '-*,
     -cert-err33-c,
     misc-*,
     -misc-unused-parameters,
+    -misc-include-cleaner,
     performance-*,
     -performance-no-int-to-ptr,
     readability-*,
-    readability-duplicate-include,
-    readability-else-after-return,
-    readability-uppercase-literal-suffix,
+    readability-static-accessed-through-instance,
     -readability-function-cognitive-complexity,
     -readability-identifier-length,
     -readability-isolate-declaration,
     -readability-magic-numbers,
+    misc-static-assert,
+    modernize-make-shared,
+    modernize-make-unique,
+    modernize-use-auto,
+    modernize-use-default-member-init,
+    modernize-use-emplace,
+    modernize-use-equals-delete,
+    modernize-use-nullptr,
+    modernize-use-override,
+    modernize-use-using,
     '
 WarningsAsErrors: ''
 HeaderFileExtensions:
@@ -46,7 +55,6 @@ ImplementationFileExtensions:
   - cxx
 HeaderFilterRegex: ''
 FormatStyle:     none
-User:            masa
 CheckOptions:
   cert-dcl16-c.NewSuffixes: 'L;LL;LU;LLU'
   cert-err33-c.AllowCastToVoid: 'true'

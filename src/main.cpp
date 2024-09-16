@@ -1,11 +1,11 @@
-#include <string> // NOLINT
-#include <memory> // NOLINT
+#include <string>
+#include <memory>
 
 // #include <fmt/core.h>
-#include <spdlog/spdlog.h> // NOLINT
-#include <spdlog/sinks/stdout_sinks.h> // NOLINT
-#include <spdlog/sinks/stdout_color_sinks.h> // NOLINT
-#include <spdlog/fmt/bundled/core.h> // NOLINT
+#include <spdlog/spdlog.h>
+#include <spdlog/sinks/stdout_sinks.h>
+#include <spdlog/sinks/stdout_color_sinks.h>
+#include <spdlog/fmt/bundled/core.h>
 
 #include "cli.hpp"
 #include "generator_a.hpp"
@@ -98,7 +98,7 @@ int main(int argc, char *argv[]) {
     SPDLOG_LOGGER_CRITICAL(logger.get(), "SPDLOG_CRITICAL");
 
     std::unique_ptr<IGenerator> generator;
-    std::string generator_type = "B";
+    const std::string generator_type = "B";
     if (generator_type == "A") {
         auto generatorA = std::unique_ptr<GeneratorA>(new GeneratorA);
         generatorA->setParam(2, -3);
