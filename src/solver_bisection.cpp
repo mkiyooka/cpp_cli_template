@@ -1,14 +1,14 @@
-#include <iostream>
+#include <cstdint>
 
 #include "igenerator.hpp"
-#include "solver.hpp"
+#include "solver_bisection.hpp"
 
-void Solver::solve() {
+double SolverBisection::solve(int32_t itr) {
     double xl = 0.0;
     double xr = 5.0;
     double y;
     double xm;
-    for (auto i = 0; i < 100; i++) {
+    for (auto i = 0; i < itr; i++) {
         xm = (xl + xr) / 2.0;
         y = _generator.generate(xm);
         if (y < 0.0) {
@@ -17,5 +17,5 @@ void Solver::solve() {
             xr = xm;
         }
     }
-    std::cout << "solve   x: " << xm << ", y: " << y << std::endl;
+    return xm;
 }

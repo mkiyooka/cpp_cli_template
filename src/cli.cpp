@@ -1,6 +1,7 @@
 #include <CLI/CLI.hpp>
 
-#include "cli_subcom_a.hpp"
+#include "cli_subcom_bisection.hpp"
+#include "cli_subcom_newton.hpp"
 
 int cli(int argc, char *argv[]) {
     CLI::App app{"cmd description"};
@@ -13,7 +14,8 @@ int cli(int argc, char *argv[]) {
         "log level: "
         "err trace debug info warn error critical");
 
-    cli_subcom_a(app);
+    cli_subcom_bisection(app);
+    cli_subcom_newton(app);
 
     try {
         app.parse(argc, argv);

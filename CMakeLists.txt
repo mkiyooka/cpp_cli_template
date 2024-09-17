@@ -14,9 +14,6 @@ endif()
 if(NOT DEFINED FMT_DIR)
     set (FMT_DIR "third_party/fmt" CACHE STRING "fmt git repository")
 endif()
-if(NOT DEFINED KANGARU_DIR)
-    set (KANGARU_DIR "third_party/kangaru" CACHE STRING "kangaru git repository")
-endif()
 
 if(NOT DEFINED DOCTEST)
     set (DOCTEST "third_party/doctest/doctest" CACHE STRING "doctest git repository")
@@ -29,33 +26,30 @@ include_directories(include)
 include_directories(${CLI11_DIR}/include)
 include_directories(${SPDLOG_DIR}/include)
 include_directories(${FMT_DIR}/include)
-include_directories(${KANGARU_DIR}/include)
 
-add_compile_definitions(SPDLOG_ACTIVE_LEVEL=SPDLOG_LEVEL_TRACE)
 add_executable(cmd
     src/main.cpp
     src/cli.cpp include/cli.hpp
-    src/cli_subcom_a.cpp include/cli_subcom_a.hpp
-    src/generator_a.cpp include/generator_a.hpp
-    src/generator_b.cpp include/generator_b.hpp
-    src/solver.cpp include/solver.hpp
+    src/cli_subcom_bisection.cpp include/cli_subcom_bisection.hpp
+    src/cli_subcom_newton.cpp include/cli_subcom_newton.hpp
+    src/generator_linear.cpp include/generator_linear.hpp
+    src/generator_quadratic.cpp include/generator_quadratic.hpp
+    src/solver_newton.cpp include/solver_newton.hpp
+    src/solver_bisection.cpp include/solver_bisection.hpp
     src/setup_logger.cpp include/setup_logger.hpp
     )
 add_subdirectory(${CLI11_DIR})
 add_subdirectory(${SPDLOG_DIR})
 add_subdirectory(${FMT_DIR})
-add_subdirectory(${KANGARU_DIR})
 target_link_libraries(cmd PUBLIC spdlog)
 target_link_libraries(cmd PUBLIC fmt)
-target_link_libraries(cmd PUBLIC kangaru::kangaru)
-target_compile_features(cmd PUBLIC cxx_std_11)
 
 # --- test ---
 enable_testing()
 add_executable(test_generator
     tests/test_generator.cpp
-    src/generator_a.cpp include/generator_a.hpp
-    src/generator_b.cpp include/generator_b.hpp
+    src/generator_linear.cpp include/generator_linear.hpp
+    src/generator_quadratic.cpp include/generator_quadratic.hpp
     )
 target_include_directories(test_generator PUBLIC include)
 
@@ -68,7 +62,7 @@ add_test(
 
 add_executable(bench_generator
     bench/bench_generator.cpp
-    src/generator_a.cpp include/generator_a.hpp
-    src/generator_b.cpp include/generator_b.hpp
+    src/generator_linear.cpp include/generator_linear.hpp
+    src/generator_quadratic.cpp include/generator_quadratic.hpp
     )
 target_include_directories(bench_generator PUBLIC ${NANOBENCH}/include)
