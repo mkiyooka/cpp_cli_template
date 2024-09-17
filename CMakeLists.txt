@@ -1,27 +1,35 @@
 cmake_minimum_required(VERSION 3.0)
 project(MyProject VERSION 0.1.0 DESCRIPTION "Very nice project" LANGUAGES CXX)
 
+set(CMAKE_CXX_STANDARD 11) # C++11
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF) # Disable GNU Extention
+
 if(NOT DEFINED CLI11_DIR)
-    set (CLI11_DIR "mod/CLI11" CACHE STRING "CLI11 git repository")
+    set (CLI11_DIR "third_party/CLI11" CACHE STRING "CLI11 git repository")
 endif()
 if(NOT DEFINED SPDLOG_DIR)
-    set (SPDLOG_DIR "mod/spdlog" CACHE STRING "spdlog git repository")
+    set (SPDLOG_DIR "third_party/spdlog" CACHE STRING "spdlog git repository")
 endif()
 if(NOT DEFINED FMT_DIR)
-    set (FMT_DIR "mod/fmt" CACHE STRING "fmt git repository")
+    set (FMT_DIR "third_party/fmt" CACHE STRING "fmt git repository")
+endif()
+if(NOT DEFINED KANGARU_DIR)
+    set (KANGARU_DIR "third_party/kangaru" CACHE STRING "kangaru git repository")
 endif()
 
 if(NOT DEFINED DOCTEST)
-    set (DOCTEST "mod/doctest/doctest" CACHE STRING "doctest git repository")
+    set (DOCTEST "third_party/doctest/doctest" CACHE STRING "doctest git repository")
 endif()
 if(NOT DEFINED NANOBENCH)
-    set (NANOBENCH "mod/nanobench/src" CACHE STRING "nanobench git repository")
+    set (NANOBENCH "third_party/nanobench/src" CACHE STRING "nanobench git repository")
 endif()
 
 include_directories(include)
 include_directories(${CLI11_DIR}/include)
 include_directories(${SPDLOG_DIR}/include)
 include_directories(${FMT_DIR}/include)
+include_directories(${KANGARU_DIR}/include)
 
 add_compile_definitions(SPDLOG_ACTIVE_LEVEL=SPDLOG_LEVEL_TRACE)
 add_executable(cmd
@@ -36,8 +44,10 @@ add_executable(cmd
 add_subdirectory(${CLI11_DIR})
 add_subdirectory(${SPDLOG_DIR})
 add_subdirectory(${FMT_DIR})
+add_subdirectory(${KANGARU_DIR})
 target_link_libraries(cmd PUBLIC spdlog)
 target_link_libraries(cmd PUBLIC fmt)
+target_link_libraries(cmd PUBLIC kangaru::kangaru)
 target_compile_features(cmd PUBLIC cxx_std_11)
 
 # --- test ---

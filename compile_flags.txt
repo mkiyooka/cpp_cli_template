@@ -6,8 +6,9 @@
 -Wno-sign-compare
 -std=c++11
 -I./include
--I./mod/spdlog/include
--I./mod/CLI11//include
--I./mod/fmt/include
--I./mod/doctest/doctest
--I./mod/nanobench/src/include
+-I./third_party/spdlog/include
+-I./third_party/CLI11//include
+-I./third_party/fmt/include
+-I./third_party/kangaru/include
+-I./third_party/doctest/doctest
+-I./third_party/nanobench/src/include

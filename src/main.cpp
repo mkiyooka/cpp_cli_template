@@ -7,6 +7,8 @@
 #include <spdlog/sinks/stdout_color_sinks.h>
 #include <spdlog/fmt/bundled/core.h>
 
+#include <kangaru/kangaru.hpp>
+
 #include "cli.hpp"
 #include "generator_a.hpp"
 #include "generator_b.hpp"
@@ -66,12 +68,17 @@ public:
     std::shared_ptr<spdlog::logger> get() const { return _logger; }
 };
 
+struct GeneratorAService : kgr::single_service<GeneratorA> { };
+
+struct SolverService : kgr::service<Solver, kgr::dependency<GeneratorAService>> { };
+
 int main(int argc, char *argv[]) {
     // Parse arguments for CLI
     cli(argc, argv);
-    // fmt::print("Hello, world!\n");
-    // std::string s = fmt::format("Hello, {}!\n", "world");
-    // fmt::print(s);
+    fmt::print("Hello, world!\n");
+    std::string s = fmt::format("Hello, {}!\n", "world");
+    fmt::print(s);
+
 
     SpdLogger logger("color", "%^[%L][%Y-%m-%d %T.%F][%P/%t][%n] %v%$"); // %e:ms, %f:us, %F:ns
     logger.setLevelDebug();
@@ -111,6 +118,12 @@ int main(int argc, char *argv[]) {
 
     Solver solver(*generator);
     solver.solve();
+
+    kgr::container container;
+    //GeneratorA generatorA = container.service<GeneratorAService>();
+    Solver solver_a = container.service<SolverService>();
+    fmt::println("-------------------- solver container --------------------");
+    solver_a.solve();
 
     return 0;
 }
