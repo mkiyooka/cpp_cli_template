@@ -9,6 +9,5 @@
 -I./third_party/spdlog/include
 -I./third_party/CLI11//include
 -I./third_party/fmt/include
--I./third_party/kangaru/include
 -I./third_party/doctest/doctest
 -I./third_party/nanobench/src/include

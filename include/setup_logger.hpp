@@ -5,6 +5,7 @@
 #include <spdlog/spdlog.h>
 #include <spdlog/sinks/stdout_sinks.h>
 #include <spdlog/sinks/stdout_color_sinks.h>
+#include <spdlog/sinks/basic_file_sink.h>
 #include <spdlog/fmt/bundled/core.h>
 
 class SpdLogger {
@@ -16,11 +17,13 @@ public:
         auto sink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
         _logger = std::make_shared<spdlog::logger>(name, sink);
         _logger->set_pattern("[%^%L%$][%Y-%m-%d %T.%F][%t][%n] %v");
+        spdlog::register_logger(_logger);
     }
     SpdLogger(const std::string &name, const std::string &pattern) {
         auto sink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
         _logger = std::make_shared<spdlog::logger>(name, sink);
         _logger->set_pattern(pattern);
+        spdlog::register_logger(_logger);
     }
     ~SpdLogger() = default;
     SpdLogger(const SpdLogger &) = delete;
