@@ -11,6 +11,9 @@ endif()
 if(NOT DEFINED SPDLOG_DIR)
     set (SPDLOG_DIR "third_party/spdlog" CACHE STRING "spdlog git repository")
 endif()
+if(NOT DEFINED TOML11_DIR)
+    set (TOML11_DIR "third_party/toml11" CACHE STRING "toml11 git repository")
+endif()
 if(NOT DEFINED FMT_DIR)
     set (FMT_DIR "third_party/fmt" CACHE STRING "fmt git repository")
 endif()
@@ -25,6 +28,7 @@ endif()
 include_directories(include)
 include_directories(${CLI11_DIR}/include)
 include_directories(${SPDLOG_DIR}/include)
+include_directories(${TOML11}/include)
 include_directories(${FMT_DIR}/include)
 
 add_executable(cmd
@@ -40,8 +44,10 @@ add_executable(cmd
     )
 add_subdirectory(${CLI11_DIR})
 add_subdirectory(${SPDLOG_DIR})
+add_subdirectory(${TOML11_DIR})
 add_subdirectory(${FMT_DIR})
 target_link_libraries(cmd PUBLIC spdlog)
+target_link_libraries(cmd PUBLIC toml11)
 target_link_libraries(cmd PUBLIC fmt)
 
 # --- test ---
