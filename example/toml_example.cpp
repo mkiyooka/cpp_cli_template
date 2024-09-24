@@ -3,35 +3,19 @@
 
 #include <toml.hpp>
 
-#include "cli.hpp"
 #include "setup_logger.hpp"
-
-void func1(const std::shared_ptr<ILogger> &logger) { logger->info("this is log@func1"); }
-
-void func2(const std::shared_ptr<ILogger> &logger) { logger->info("this is log@func2"); }
 
 struct conf_t {
     std::string title;
+    std::string owner_name;
 };
 
 void loadToml(conf_t &conf, const std::string &filePath);
 
 int main(int argc, char *argv[]) {
-    cli(argc, argv); // Parse arguments for CLI
-
-    std::shared_ptr<ILogger> logger = nullptr;
-    const std::string s = "console";
-    if (s == "file") {
-        logger = std::make_shared<FileLogger>("Logger2", "./log/basic.log");
-    } else {
-        logger = std::make_shared<ConsoleLogger>("Logger1");
-    }
-    logger->info("this is log@main");
-    func1(logger);
-    func2(logger);
-
     conf_t conf;
     loadToml(conf, "../conf/example.toml");
+
     return 0;
 }
 
@@ -42,18 +26,16 @@ void loadToml(conf_t &conf, const std::string &filePath) {
     auto tomlData = toml::parse("../conf/example.toml", toml::spec::v(1, 0, 0));
 
     // title = "TOML Example"
-    auto title1 = toml::find<std::string>(tomlData, "title");
-    auto title2 = tomlData.at("title").as_string();
-    p->info("title: {} {}", title1, title2);
+    conf.title = tomlData.at("title").as_string();
+    p->info("title: {}", conf.title);
 
     // [owner]
     // name = "Tom Preston-Werner"
     // dob = 1979-05-27T07:32:00-08:00 # First class dates
-    auto owner_name1 = toml::find<std::string>(tomlData, "owner", "name");
-    auto owner_name2 = tomlData.at("owner").at("name").as_string();
+    conf.owner_name = tomlData.at("owner").at("name").as_string();
     auto dob1 = toml::find<toml::offset_datetime>(tomlData, "owner", "dob");
     auto dob2 = tomlData.at("owner").at("dob").as_offset_datetime();
-    p->info("owner.name: {} {}", owner_name1, owner_name2);
+    p->info("owner.name: {}", conf.owner_name);
     p->info(
         "{:04d}-{:02d}-{:02d}T{:02d}:{:02d}:{:02d}{:+03d}:{:02d}", dob1.date.year, dob1.date.month, dob1.date.day,
         dob1.time.hour, dob1.time.minute, dob1.time.second, dob1.offset.hour, dob1.offset.minute);
