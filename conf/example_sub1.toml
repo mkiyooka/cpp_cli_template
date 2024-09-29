@@ -1,0 +1,22 @@
+title = "config file title"
+
+[[plugin]]
+file = "fileA.toml"
+number = 10
+
+[[plugin]]
+file = "fileB.toml"
+number = 15
+
+[[plugin]]
+file = "fileC.toml"
+number = 30
+
+[[logger]]
+type = "file"
+file = "./log/basic.log"
+name = "abc"
+
+[[logger]]
+type = "console"
+name = "def"

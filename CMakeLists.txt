@@ -33,14 +33,15 @@ include_directories(${FMT_DIR}/include)
 
 add_executable(cmd
     src/main.cpp
-    src/cli.cpp include/cli.hpp
-    src/cli_subcom_bisection.cpp include/cli_subcom_bisection.hpp
-    src/cli_subcom_newton.cpp include/cli_subcom_newton.hpp
-    src/generator_linear.cpp include/generator_linear.hpp
-    src/generator_quadratic.cpp include/generator_quadratic.hpp
-    src/solver_newton.cpp include/solver_newton.hpp
-    src/solver_bisection.cpp include/solver_bisection.hpp
-    src/setup_logger.cpp include/setup_logger.hpp
+    src/cli.cpp
+    src/cli_subcom_bisection.cpp
+    src/cli_subcom_newton.cpp
+    src/generator_linear.cpp
+    src/generator_quadratic.cpp
+    src/solver_newton.cpp
+    src/solver_bisection.cpp
+    src/setup_logger.cpp
+    src/load_toml.cpp
     )
 add_subdirectory(${CLI11_DIR})
 add_subdirectory(${SPDLOG_DIR})

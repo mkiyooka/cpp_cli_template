@@ -5,127 +5,36 @@
 
 #include "cli.hpp"
 #include "setup_logger.hpp"
-
-void func1(const std::shared_ptr<ILogger> &logger) { logger->info("this is log@func1"); }
-
-void func2(const std::shared_ptr<ILogger> &logger) { logger->info("this is log@func2"); }
-
-struct conf_t {
-    std::string title;
-};
-
-void loadToml(conf_t &conf, const std::string &filePath);
+#include "load_toml.hpp"
 
 int main(int argc, char *argv[]) {
     cli(argc, argv); // Parse arguments for CLI
 
-    std::shared_ptr<ILogger> logger = nullptr;
-    const std::string s = "console";
-    if (s == "file") {
-        logger = std::make_shared<FileLogger>("Logger2", "./log/basic.log");
-    } else {
-        logger = std::make_shared<ConsoleLogger>("Logger1");
-    }
-    logger->info("this is log@main");
-    func1(logger);
-    func2(logger);
+    std::shared_ptr<ILoggerMaker> loggerMaker = nullptr;
 
     conf_t conf;
-    loadToml(conf, "../conf/example.toml");
+
+    loadToml("../conf/example_sub1.toml", conf);
+    // for(const auto &m: conf.plugins) {
+    //  m.file, m.number;
+    // }
+    std::shared_ptr<spdlog::logger> A;
+    for (const auto &m : conf.loggers) {
+        if (m.type == "file") {
+            loggerMaker = std::make_shared<FileLogger>(m.file);
+            A = loggerMaker->build(m.name);
+        } else {
+            loggerMaker = std::make_shared<ConsoleLogger>();
+        }
+    }
+
+    auto B = loggerMaker->build("B");
+    auto C = loggerMaker->build("C");
+    A->set_level(spdlog::level::warn);
+
+    A->warn("this is log@main");
+    B->warn("this is log@main");
+    C->info("this is log@main");
+
     return 0;
-}
-
-void loadToml(conf_t &conf, const std::string &filePath) {
-    auto paramLogger = std::make_shared<ConsoleLogger>("param");
-    auto p = paramLogger->get();
-
-    auto tomlData = toml::parse("../conf/example.toml", toml::spec::v(1, 0, 0));
-
-    // title = "TOML Example"
-    auto title1 = toml::find<std::string>(tomlData, "title");
-    auto title2 = tomlData.at("title").as_string();
-    p->info("title: {} {}", title1, title2);
-
-    // [owner]
-    // name = "Tom Preston-Werner"
-    // dob = 1979-05-27T07:32:00-08:00 # First class dates
-    auto owner_name1 = toml::find<std::string>(tomlData, "owner", "name");
-    auto owner_name2 = tomlData.at("owner").at("name").as_string();
-    auto dob1 = toml::find<toml::offset_datetime>(tomlData, "owner", "dob");
-    auto dob2 = tomlData.at("owner").at("dob").as_offset_datetime();
-    p->info("owner.name: {} {}", owner_name1, owner_name2);
-    p->info(
-        "{:04d}-{:02d}-{:02d}T{:02d}:{:02d}:{:02d}{:+03d}:{:02d}", dob1.date.year, dob1.date.month, dob1.date.day,
-        dob1.time.hour, dob1.time.minute, dob1.time.second, dob1.offset.hour, dob1.offset.minute);
-    p->info(
-        "{:04d}-{:02d}-{:02d}T{:02d}:{:02d}:{:02d}{:+03d}:{:02d}", dob2.date.year, dob2.date.month, dob2.date.day,
-        dob2.time.hour, dob2.time.minute, dob2.time.second, dob2.offset.hour, dob2.offset.minute);
-
-
-    // [database]
-    // server = "192.168.1.1"
-    // ports = [ 8000, 8001, 8002 ]
-    // connection_max = 5000
-    // enabled = true
-    auto database_server1 = toml::find<std::string>(tomlData, "database", "server");
-    auto database_server2 = tomlData.at("database").at("server").as_string();
-    p->info("database.server: {} {}", database_server1, database_server2);
-    auto database_ports = toml::find<std::vector<int>>(tomlData, "database", "ports");
-    p->info("database.ports: {}, {}, {}", database_ports[0], database_ports[1], database_ports[2]);
-    auto database_connection_max = toml::find<int>(tomlData, "database", "connection_max");
-    p->info("database.connection_max: {}", database_connection_max);
-
-    // [servers]
-    //   # Indentation (tabs and/or spaces) is allowed but not required
-    //   [servers.alpha]
-    //   ip = "10.0.0.1"
-    //   dc = "eqdc10"
-    //   [servers.beta]
-    //   ip = "10.0.0.2"
-    //   dc = "eqdc10"
-    auto alpha_ip = toml::find<std::string>(tomlData, "servers", "alpha", "ip");
-    auto alpha_dc = toml::find<std::string>(tomlData, "servers", "alpha", "dc");
-    p->info("alpha.ip: {}", alpha_ip);
-    p->info("alpha.dc: {}", alpha_dc);
-    auto beta_ip = toml::find<std::string>(tomlData, "servers", "beta", "ip");
-    auto beta_dc = toml::find<std::string>(tomlData, "servers", "beta", "dc");
-    p->info("beta.ip: {}", beta_ip);
-    p->info("beta.dc: {}", beta_dc);
-
-    // [clients]
-    // data = [ ["gamma", "delta"], [1, 2] ]
-
-    // # Line breaks are OK when inside arrays
-    // hosts = [
-    //   "alpha",
-    //   "omega"
-    // ]
-    auto clients = tomlData.at("clients");
-    auto data = clients.at("data");
-    p->info("[{} {}]",
-            data.at(0).at(0).as_string(),
-            data.at(0).at(1).as_string());
-    p->info("[{} {}]",
-            data.at(1).at(0).as_integer(),
-            data.at(1).at(1).as_integer());
-    auto Pair = toml::find<std::pair<std::vector<std::string>, std::vector<int>>>(clients, "data");
-    p->info("[{} {}]",
-            Pair.first[0],
-            Pair.first[1]);
-    p->info("[{} {}]",
-            Pair.second[0],
-            Pair.second[1]);
-    auto Tuple = toml::find<std::tuple<std::vector<std::string>, std::vector<int>>>(clients, "data");
-    p->info("[{} {}]",
-            std::get<0>(Tuple)[0],
-            std::get<0>(Tuple)[1]);
-    p->info("[{} {}]",
-            std::get<1>(Tuple)[0],
-            std::get<1>(Tuple)[1]);
-
-    auto clients_hosts = toml::find<std::vector<std::string>>(tomlData, "clients", "hosts");
-    p->info("clients_hosts: {} {}",
-            clients_hosts[0],
-            clients_hosts[1]
-            );
 }

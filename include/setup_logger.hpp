@@ -1,6 +1,6 @@
 #pragma once
 
-#include <iostream>
+#include <map>
 #include <string>
 
 #include <spdlog/spdlog.h>
@@ -9,75 +9,82 @@
 #include <spdlog/sinks/basic_file_sink.h>
 #include <spdlog/fmt/bundled/core.h>
 
-class ILogger {
+class ILoggerMaker {
 protected:
-    std::shared_ptr<spdlog::logger> _logger;
+    std::map<std::string, std::shared_ptr<spdlog::logger>> _loggers;
 
 public:
     // clang-format off
-    void setPattern(const std::string &pattern) { _logger->set_pattern(pattern); }
-    void setLevel(const std::string &logLevel) {
+    void setLevel(const std::string &name, const std::string &logLevel) {
         if (logLevel == "trace") {
-            _logger->set_level(spdlog::level::trace);
+            _loggers.at(name)->set_level(spdlog::level::trace);
         } else if (logLevel == "debug") {
-            _logger->set_level(spdlog::level::debug);
+            _loggers.at(name)->set_level(spdlog::level::debug);
         } else if (logLevel == "info") {
-            _logger->set_level(spdlog::level::info);
+            _loggers.at(name)->set_level(spdlog::level::info);
         } else if (logLevel == "warning") {
-            _logger->set_level(spdlog::level::warn);
+            _loggers.at(name)->set_level(spdlog::level::warn);
         } else if (logLevel == "error") {
-            _logger->set_level(spdlog::level::err);
+            _loggers.at(name)->set_level(spdlog::level::err);
         } else if (logLevel == "critical") {
-            _logger->set_level(spdlog::level::critical);
+            _loggers.at(name)->set_level(spdlog::level::critical);
         }
     }
-    void setLevelTrace()    { _logger->set_level(spdlog::level::trace);    }
-    void setLevelDebug()    { _logger->set_level(spdlog::level::debug);    }
-    void setLevelInfo()     { _logger->set_level(spdlog::level::info);     }
-    void setLevelWarn()     { _logger->set_level(spdlog::level::warn);     }
-    void setLevelError()    { _logger->set_level(spdlog::level::err);      }
-    void setLevelCritical() { _logger->set_level(spdlog::level::critical); }
-
-    inline void trace    (const std::string &s) const { _logger->trace(s);    }
-    inline void debug    (const std::string &s) const { _logger->debug(s);    }
-    inline void info     (const std::string &s) const { _logger->info(s);     }
-    inline void warn     (const std::string &s) const { _logger->warn(s);     }
-    inline void error    (const std::string &s) const { _logger->error(s);    }
-    inline void critical (const std::string &s) const { _logger->critical(s); }
+    void setLevelTrace(const std::string &name)    { _loggers.at(name)->set_level(spdlog::level::trace);    }
+    void setLevelDebug(const std::string &name)    { _loggers.at(name)->set_level(spdlog::level::debug);    }
+    void setLevelInfo(const std::string &name)     { _loggers.at(name)->set_level(spdlog::level::info);     }
+    void setLevelWarn(const std::string &name)     { _loggers.at(name)->set_level(spdlog::level::warn);     }
+    void setLevelError(const std::string &name)    { _loggers.at(name)->set_level(spdlog::level::err);      }
+    void setLevelCritical(const std::string &name) { _loggers.at(name)->set_level(spdlog::level::critical); }
     // clang-format on
-    std::shared_ptr<spdlog::logger> get() const { return _logger; }
+    std::shared_ptr<spdlog::logger> get(const std::string &name) const { return _loggers.at(name); }
+    virtual std::shared_ptr<spdlog::logger> build(const std::string &name) = 0;
 };
 
-class ConsoleLogger : public ILogger {
+class ConsoleLogger : public ILoggerMaker {
+private:
+    std::shared_ptr<spdlog::sinks::sink> _sink;
+
 public:
-    explicit ConsoleLogger(const std::string &name, const std::string &pattern = "[%L][%Y-%m-%d %T.%f][%n] %v") {
-        auto sink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
-        _logger = std::make_shared<spdlog::logger>(name, sink);
-        _logger->set_pattern(pattern);
-        spdlog::register_logger(_logger);
+    explicit ConsoleLogger(const std::string &pattern = "[%L][%Y-%m-%d %T.%f][%n] %v") {
+        _sink = std::make_shared<spdlog::sinks::stdout_color_sink_st>();
     }
     ConsoleLogger(const ConsoleLogger &) = delete;            // copy constructor
     ConsoleLogger(ConsoleLogger &&) = delete;                 // move constructor
     ConsoleLogger &operator=(ConsoleLogger const &) = delete; // copy
     ConsoleLogger &operator=(ConsoleLogger &&) = delete;      // move
     ~ConsoleLogger() = default;
+
+    std::shared_ptr<spdlog::logger> build(const std::string &name) override {
+        auto logger = std::make_shared<spdlog::logger>(name, _sink);
+        logger->set_pattern("[%L][%Y-%m-%d %T.%f][%n] %v");
+        //spdlog::register_logger(logger);
+        _loggers.insert({name, logger});
+        return logger;
+    }
 };
 
-class FileLogger : public ILogger {
+class FileLogger : public ILoggerMaker {
+private:
+    std::shared_ptr<spdlog::sinks::sink> _sink;
+
 public:
     explicit FileLogger(
-        const std::string &name, const std::string &filename = "./log/basic.log",
-        const std::string &pattern = "[%L][%Y-%m-%d %T.%f][%n] %v") {
-        auto sink = std::make_shared<spdlog::sinks::basic_file_sink_st>(filename);
-        _logger = std::make_shared<spdlog::logger>(name, sink);
-        spdlog::initialize_logger(_logger);
-        sink->set_pattern("[%L][%Y-%m-%d %T.%f][%n] %v");
-        // spdlog::register_logger(_logger);
+        const std::string &filename = "./log/basic.log", const std::string &pattern = "[%L][%Y-%m-%d %T.%f][%n] %v") {
+        _sink = std::make_shared<spdlog::sinks::basic_file_sink_st>(filename);
     }
     FileLogger(const FileLogger &) = delete;            // copy constructor
     FileLogger(FileLogger &&) = delete;                 // move constructor
     FileLogger &operator=(FileLogger const &) = delete; // copy
     FileLogger &operator=(FileLogger &&) = delete;      // move
     ~FileLogger() = default;
+
+    std::shared_ptr<spdlog::logger> build(const std::string &name) override {
+        auto logger = std::make_shared<spdlog::logger>(name, _sink);
+        spdlog::initialize_logger(logger);
+        logger->set_pattern("[%L][%Y-%m-%d %T.%f][%n] %v");
+        _loggers.insert({name, logger});
+        return logger;
+    }
 };
 

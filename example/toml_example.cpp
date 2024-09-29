@@ -11,6 +11,7 @@ struct conf_t {
 };
 
 void loadToml(conf_t &conf, const std::string &filePath);
+void loadES1(conf_t &conf, const std::string &filePath);
 
 int main(int argc, char *argv[]) {
     conf_t conf;

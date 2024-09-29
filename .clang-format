@@ -9,3 +9,4 @@ SortIncludes: Never
 AlignAfterOpenBracket: AlwaysBreak
 AlignArrayOfStructures: Right
 AccessModifierOffset: -4
+PackConstructorInitializers: Never
